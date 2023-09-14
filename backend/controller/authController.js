@@ -1,6 +1,8 @@
 const Joi = require("joi");
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
+const userDto = require("../dto/user");
+const UserDto = require("../dto/user");
 const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,25}$/;
 
 const authController = {
@@ -58,8 +60,51 @@ const authController = {
     });
     let user = await userToRegister.save();
     // 6. response send
-    return res.status(201).json({ user });
+    const userDto = new UserDto(user);
+    return res.status(201).json({ user: userDto });
   },
-  // async login() {},
+  async login(req, res, next) {
+    // step 1 validate user
+    const userLoginSchema = Joi.object({
+      username: Joi.string().min(5).max(30).required(),
+      password: Joi.string().pattern(passwordPattern),
+    });
+    const { error } = userLoginSchema.validate(req.body);
+    if (error) {
+      next(error);
+    }
+
+    // step 2 match username and password
+    const { username, password } = req.body;
+    let user;
+    try {
+      // match user name
+      //user name se pore user ka record mila ga
+      user = await User.findOne({ username: username });
+      if (!user) {
+        const error = {
+          status: 401,
+          message: "Invalid username or password",
+        };
+        return next(error);
+      }
+
+      // match password
+      const match = await bcrypt.compare(password, user.password);
+      if (!match) {
+        const error = {
+          status: 401,
+          message: "Invalid password",
+        };
+        return next(error);
+      }
+    } catch (error) {
+      return next(error);
+    }
+    
+    // response send
+    const userDto = new UserDto(user);
+    return res.status(200).json({ user: userDto });
+  },
 };
 module.exports = authController;
