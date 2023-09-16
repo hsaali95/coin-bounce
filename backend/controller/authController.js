@@ -1,8 +1,10 @@
 const Joi = require("joi");
 const User = require("../models/user");
 const bcrypt = require("bcryptjs");
-const userDto = require("../dto/user");
 const UserDto = require("../dto/user");
+const JWTService = require("../services/JWTService");
+const user = require("../models/user");
+
 const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,25}$/;
 
 const authController = {
@@ -51,14 +53,44 @@ const authController = {
     }
     // 4. if no error hash passowrd
     const hashedPassword = await bcrypt.hash(password, 10); //10 for extra security
-    // 5. store user data in db
-    const userToRegister = new User({
-      username,
-      name,
-      email,
-      password: hashedPassword,
+    let accessToken;
+    let refreshToken;
+    let user
+    try {
+      const userToRegister = new User({
+        username,
+        name,
+        email,
+        password: hashedPassword,
+      });
+       user = await userToRegister.save();
+
+      // token generation
+      accessToken = JWTService.signAccessToken(
+        { _id: user._id, username: user.email },
+        "30m"
+      );
+      refreshToken = JWTService.signRefreshToken(
+        { _id: user._id, username: user.email },
+        "60m"
+      );
+    } catch (error) {
+      return next(error);
+    }
+    // store refresh token in db 
+    await JWTService.storeRefreshToken(refreshToken,user._id)
+
+    // send tokens in cookies 
+    res.cookie("accessToken", accessToken, {
+      maxAge: 1000 * 60 * 60 * 24,
+      httpOnly: true,
     });
-    let user = await userToRegister.save();
+    res.cookie("refreshToken", refreshToken, {
+      maxAge: 1000 * 60 * 60 * 24,
+      httpOnly: true,
+    });
+    // 5. store user data in db
+
     // 6. response send
     const userDto = new UserDto(user);
     return res.status(201).json({ user: userDto });
@@ -101,7 +133,7 @@ const authController = {
     } catch (error) {
       return next(error);
     }
-    
+
     // response send
     const userDto = new UserDto(user);
     return res.status(200).json({ user: userDto });

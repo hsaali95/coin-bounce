@@ -32,7 +32,7 @@ class JWTService {
       // store in db
       await newToken.save();
     } catch (error) {
-      console.log();
+      console.log(error);
     }
   }
 }
