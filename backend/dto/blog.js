@@ -4,6 +4,7 @@ class BlogDTO {
     this.content = blog.content;
     this.title = blog.title;
     this.photo = blog.photoPath;
+    this._id = blog._id
   }
 }
 
