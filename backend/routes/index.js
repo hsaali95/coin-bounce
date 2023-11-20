@@ -1,6 +1,7 @@
 const express = require("express");
 const authController = require("../controller/authController");
 const blogController = require("../controller/blogController");
+const userController = require("../controller/userController");
 const auth = require("../middlewares/auth");
 const router = express.Router();
 
@@ -13,6 +14,9 @@ router.post("/login", authController.login);
 
 //logout
 router.post("/logout", auth, authController.logout);
+
+//change password and user details
+router.post("/user/changePassword", auth, userController.changePassword);
 //refresh
 
 //blog
