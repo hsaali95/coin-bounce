@@ -9,21 +9,6 @@ const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,25}$/;
 
 const authController = {
   async register(req, res, next) {
-    // // 1. validate user input
-    // const userRegisterSchema = Joi.object({
-    //   username: Joi.string().min(5).max(30).required(),
-    //   name: Joi.string().max(30).required(),
-    //   email: Joi.string().email().required(),
-    //   password: Joi.string().pattern(passwordPattern).required(),
-    //   confirmPassword: Joi.ref("password"),
-    // });
-    // const { error } = userRegisterSchema.validate(req.body);
-
-    // // 2. if error in validations -> return error via middleware
-    // if (error) {
-    //   return next(error);
-    // }
-
     // 3. if email or username is already registered - > user or email exits
     const { username, name, email, password } = req.body;
     try {
@@ -91,16 +76,6 @@ const authController = {
   },
 
   async login(req, res, next) {
-    // step 1 validate user
-    const userLoginSchema = Joi.object({
-      username: Joi.string().min(5).max(30).required(),
-      password: Joi.string().pattern(passwordPattern),
-    });
-    const { error } = userLoginSchema.validate(req.body);
-    if (error) {
-      next(error);
-    }
-
     // step 2 match username and password
     const { username, password } = req.body;
     let user;
@@ -164,7 +139,7 @@ const authController = {
     return res.status(200).json({ user: userDto, auth: true });
   },
   async logout(req, res, next) {
-    console.log(req)
+    console.log(req);
     // delete refresh token from db
     const { refreshToken } = req.cookies;
 
@@ -174,9 +149,9 @@ const authController = {
       return next(error);
     }
 
-    // clear cookies 
-    res.clearCookie("refreshToken")
-    res.clearCookie("accessToken")
+    // clear cookies
+    res.clearCookie("refreshToken");
+    res.clearCookie("accessToken");
 
     //send response
     res.status(200).json({ user: null, auth: false });

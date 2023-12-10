@@ -12,7 +12,7 @@ const router = express.Router();
 //register
 router.post("/register", Validator("register"), authController.register);
 // login
-router.post("/login", authController.login);
+router.post("/login", Validator("login"), authController.login);
 
 //logout
 router.post("/logout", auth, authController.logout);
