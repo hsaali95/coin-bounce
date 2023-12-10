@@ -3,12 +3,14 @@ const authController = require("../controller/authController");
 const blogController = require("../controller/blogController");
 const userController = require("../controller/userController");
 const auth = require("../middlewares/auth");
+const Validator = require("../middlewares/validator");
+
 const router = express.Router();
 
 //user
 
 //register
-router.post("/register", authController.register);
+router.post("/register", Validator("register"), authController.register);
 // login
 router.post("/login", authController.login);
 
