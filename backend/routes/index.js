@@ -19,6 +19,9 @@ router.post("/logout", auth, authController.logout);
 
 //change password and user details
 router.post("/user/changePassword", auth, userController.changePassword);
+
+//change forgot password and user details
+router.post("/forgetPassword", auth, userController.forgetPassword);
 //refresh
 
 //blog
