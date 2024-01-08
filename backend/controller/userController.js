@@ -98,6 +98,8 @@ const userController = {
         return next(error);
       }
     }
+    // link generation 
+    
     return res.status(200).json({ message: "Email send successfully" });
   },
 };
