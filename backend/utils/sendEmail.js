@@ -2,7 +2,6 @@ const nodemailer = require("nodemailer");
 const { SMTP_USER_AND_PASSWORD, SMTP_HOST, SMTP_PORT } = require("../config");
 
 const sendEmail = async (email, subject, text) => {
-  console.log("SMTP_PORT", SMTP_PORT);
   try {
     const transporter = nodemailer.createTransport({
       host: SMTP_HOST,

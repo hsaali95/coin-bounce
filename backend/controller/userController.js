@@ -3,6 +3,8 @@ const bcrypt = require("bcryptjs");
 const Joi = require("joi");
 const Token = require("../models/token");
 const JWTService = require("../services/JWTService");
+const sendEmail = require("../utils/sendEmail");
+const { BACKEND_SERVER_PATH } = require("../config");
 
 const passwordPattern = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)[a-zA-Z\d]{8,25}$/;
 
@@ -78,10 +80,13 @@ const userController = {
       };
       return next(error);
     }
-    // find if token already exists
+    // find token by user id and if token already exists
     token = await Token.findOne({ userId: user._id });
     if (!token) {
+      // if no token create or update it
       token = JWTService.signAccessToken({ _id: user._id }, "30m");
+
+      console.log("token",token); 
       try {
         await Token.updateOne(
           {
@@ -98,8 +103,10 @@ const userController = {
         return next(error);
       }
     }
-    // link generation 
-    
+    // link generation
+    const link = `${BACKEND_SERVER_PATH}/password-reset/${user._id}/${token.token}`;
+    await sendEmail(user.email, "Password reset", link);
+
     return res.status(200).json({ message: "Email send successfully" });
   },
 };
